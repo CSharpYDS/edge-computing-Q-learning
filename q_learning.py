@@ -36,7 +36,7 @@ def QLearningPolicy(job_sequence):
     cost_min1 = 1000000
     wrong = 0
     ret_history = []
-    for episode in range(300):
+    for episode in range(1):
         S = Servers()
         cost = 0
         cost1 = 0

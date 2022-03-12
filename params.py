@@ -1,10 +1,14 @@
 #encoding: utf-8
 import numpy as np
-PATH = '/Users/chen/Downloads/code/zxy_DQN_sum_state/model/model.pt'
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
+PATH ='model/model.pt'
 
 LOAD_OK = True
 V_OK = True
-Q_OK = False
+Q_OK = True
 
 BETA = 100
 
@@ -15,7 +19,7 @@ N_CONFIG = 20
 # 函数数量
 N_FUNC = 20
 # 任务数量
-N_JOB = 20
+N_JOB = 10
 # 队列最大容量
 LQ = 60
 
@@ -46,13 +50,46 @@ eta = 0.1
 GAMMA = 0.9  # 時間割引率
 NUM_EPISODES = 500  # 最大試行回数
 
+PROC_MIN = int(1.10 * 1)
+PROC_MAX = int(1.20 * 3)
+
+PROC_RNG = np.arange(PROC_MIN, PROC_MAX, step = 1, dtype = np.int32)
+PROC_RNG_L = len(PROC_RNG)
+
+def multoss(p_vec):
+    return (np.random.rand() > np.cumsum(p_vec)).argmin()
+
+def genHeavyTailDist(size):     #e.g. [0, 0, ... 1, 1]
+    mid_size = size - size//6
+    arr_1 = 0.1*np.random.rand(mid_size).astype(np.float64)
+    arr_2 = 0.6+0.1*np.random.rand(size-mid_size).astype(np.float64)
+    arr = np.sort( np.concatenate((arr_1, arr_2)) )
+    return (arr / np.sum(arr))
+
+def genHeavyHeadDist(size):     #e.g. [1, 1, ... 0, 0]
+    arr = genHeavyTailDist(size)
+    return arr[::-1]
+
+def genProcessingParameter(redo = False):
+    global PROC_RNG, PROC_RNG_L
+    if redo:
+        PROC_RNG = np.arange(PROC_MIN, PROC_MAX, step = 1, dtype = np.int32)
+    params = np.zeros((N_JOB, N_SERVER), dtype = np.int32)
+    for j in range(N_JOB):
+        for m in range(N_SERVER):
+            _tmp_dist = genHeavyHeadDist(PROC_RNG_L)
+            params[j, m] = PROC_RNG[multoss(_tmp_dist)]
+    return params
 
 # 生成随机参数
 def randomTimes():
     # job传输到server上的时间 
-    t_transmission = np.random.randint(MIN_TRANS_TIME,MAX_TRANS_TIME,(N_JOB,N_SERVER)) #TODO：设置范围 
+    # t_transmission = np.random.randint(MIN_TRANS_TIME,MAX_TRANS_TIME,(N_JOB,N_SERVER)) #TODO：设置范围 
+    t_transmission = genProcessingParameter()
     # job计算的时间
-    t_compute = np.random.randint(MIN_COMPUTE_TIME,MAX_COMPUTE_TIME,N_JOB) #TODO：设置范围
+    t_compute = np.random.poisson(5,N_JOB) #计算时间符合质数分布
+    # print(t_compute)
+    # print(t_transmission)
     return t_transmission,t_compute
 
 def randomConfig():
@@ -73,6 +110,7 @@ def randomConfig():
     t_fetch = t_bypass * 10
     # TODO: job到server的对应关系
     return configuration,t_relay, t_bypass, t_fetch
+
 
 # 赋予全局参数
 if V_OK:

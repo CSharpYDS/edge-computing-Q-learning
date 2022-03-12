@@ -72,8 +72,8 @@ class Brain:
             self.main_q_network = torch.load(PATH)
             self.target_q_network = torch.load(PATH) 
         else:
-            self.main_q_network = Net(n_in, n_mid, n_out)  
-            self.target_q_network = Net(n_in, n_mid, n_out)  
+            self.main_q_network = Net(n_in, n_mid, n_out).to(device) 
+            self.target_q_network = Net(n_in, n_mid, n_out).to(device) 
 
         self.optimizer = optim.Adam(
             self.main_q_network.parameters(), lr=0.0001)
@@ -116,14 +116,22 @@ class Brain:
     def get_expected_state_action_values(self):
         self.main_q_network.eval()
         self.target_q_network.eval()
-        self.state_action_values = self.main_q_network(self.state_batch).gather(1, self.action_batch)
+
+        # self.state_action_values = self.main_q_network(self.state_batch).cuda(device).gather(1, self.action_batch)
+        self.state_action_values = self.main_q_network(self.state_batch).gather(1, self.action_batch.to(device)).to(device)
+
         non_final_mask = torch.ByteTensor(tuple(map(lambda s: s is not None, self.batch.next_state)))
         next_state_values = torch.zeros(BATCH_SIZE)
-        a_m = torch.zeros(BATCH_SIZE).type(torch.LongTensor)
-        a_m[non_final_mask] = self.main_q_network(self.non_final_next_states).detach().max(1)[1]
-        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1)
+
+        a_m = torch.zeros(BATCH_SIZE).type(torch.LongTensor).to(device)
+
+        a_m[non_final_mask] = self.main_q_network(self.non_final_next_states).detach().max(1)[1].to(device)
+        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1).to(device)
+
         next_state_values[non_final_mask] = self.target_q_network(self.non_final_next_states).gather(1, a_m_non_final_next_states).detach().squeeze()
-        expected_state_action_values = self.reward_batch + GAMMA * next_state_values
+        # print(self.reward_batch)
+        # print(next_state_values)
+        expected_state_action_values = self.reward_batch + GAMMA * next_state_values.to(device)
         return expected_state_action_values
 
     def update_main_q_network(self):

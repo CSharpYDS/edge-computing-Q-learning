@@ -1,5 +1,7 @@
 #encoding: utf-8
 from params import *
+from schedule_policy import *
+from copy import copy
 
 class Job(object):
     def __init__(self,job_id, time):
@@ -53,14 +55,23 @@ class State(object):
             server_id += 1
             
         return self.trans_state, self.queue_state, self.server_state
+    
+        
 
 class Server(object):
     def __init__(self):
         self.server = []
         self.computing = None
         self.waiting = []
-        self.notwating = []
+        self.notwaiting = []
         self.computing_time = 0
+    def clone(self, s):
+        self.server = copy(s.server)
+        self.computing = copy(s.computing)
+        self.waiting = copy(s.waiting)
+        self.notwaiting = copy(s.notwaiting)
+        self.computing_time = copy(s.computing_time)
+        return self
     def add(self, job):
         self.server.append(job)
     def addComputing(self, job:Job, time):
@@ -82,6 +93,11 @@ class Server(object):
 class Servers(object):
     def __init__(self):
         self.servers = [Server() for i in range(N_SERVER)]
+    def clone(self, S):
+        for i in range(len(self.servers)):
+            self.servers[i].clone(S.servers[i])
+        return self
+        
     def add(self, id, job):
         self.servers[id].add(job)
     def done(self):
@@ -89,17 +105,33 @@ class Servers(object):
             if len(s.server) > 0 or s.computing!= None:
                 return False
         return True    
-
-# 随机生成工作序列
-def generate_job_sequence(my_length):
-    values = []
-    length = np.random.randint(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE) # 随机生成队列长度
-    for i in range(my_length):
-        job_id = np.random.randint(N_JOB)
-        time = np.random.randint(MIN_TIMELINE,MAX_TIMELINE)
-        values.append(Job(job_id, time))
-    job_sequence = sorted(values,key=lambda x:x.depart_time)
-    return job_sequence
+    def getAddedCost(self, job, server_id, time):
+        S1 = self
+        S1, _, _, _ = SJFPolicy(S1, job.arrive_time, 0, 0, [])
+        cost = 0.0
+        prefix = 0
+        for x in S1.servers[server_id].waiting:
+            if x.compute_time > job.compute_time:
+                cost += float(1.0 * job.compute_time/x.compute_time)
+            elif x.compute_time <= job.compute_time:
+                cost += float(1.0 * x.compute_time/job.compute_time)
+                prefix += x.compute_time
+        notwaiting = sorted(S1.servers[server_id].notwaiting, key=lambda x:(x.compute_time, x.arrive_time))
+        for x in notwaiting:
+            if x.compute_time >= job.compute_time:
+                if x.arrive_time <= time + prefix:
+                    cost += float(1.0 * job.compute_time / x.compute_time)
+                elif time + prefix < x.arrive_time and x.arrive_time <= time+prefix + job.compute_time:
+                    gap = time + prefix + job.compute_time - x.arrive_time
+                    cost += float(1.0 * gap / x.compute_time)
+            else:
+                if x.arrive_time < time + prefix:
+                    prefix += x.arrive_time
+                    cost += float(1.0 * x.compute_time / job.compute_time)
+                elif x.arrive_time < time + prefix + job.compute_time:
+                    gap = time + prefix + job.compute_time - x.arrive_time
+                    cost += float(1.0 * gap / x.compute_time)
+        return cost
 
 
 class BinaryIndexTree:
@@ -140,6 +172,7 @@ def judge(history):
         compute_time = t_compute[job_id] # 8
         arrive_time = finish_time - compute_time + 1 # 15
         if servers[server_id].query(0,finish_time) != 0:
+            print(x[0], x[1], x[2], compute_time, arrive_time)
             return False
         servers[server_id].update(arrive_time, -1)
         servers[server_id].update(finish_time, 1)
@@ -147,3 +180,24 @@ def judge(history):
     return True
 
 
+
+# 随机生成工作序列
+def generate_job_sequence(my_length = 0):
+    values = []
+    job_num = np.random.poisson(2, N_JOB) # job 个数符合泊松分布
+    job_gap = {}
+    for i in range(N_JOB):
+        job_gap[i] = np.random.poisson(3, job_num[i]) # job 间隔符合指数分布
+        ptr = 0
+        for j in range(len(job_gap[i])):
+            values.append(Job(i, ptr + job_gap[i][j]))
+            ptr += job_gap[i][j]
+    # length = np.random.randint(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE) # 随机生成队列长度
+    # for i in range(my_length):
+    #     job_id = np.random.randint(N_JOB)
+    #     time = np.random.randint(MIN_TIMELINE,MAX_TIMELINE)
+    #     values.append(Job(job_id, time))
+    job_sequence = sorted(values,key=lambda x:x.depart_time)
+    # for x in job_sequence:
+    #     print(x.job_id, x.depart_time)
+    return job_sequence

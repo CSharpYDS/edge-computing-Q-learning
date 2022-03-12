@@ -1,10 +1,10 @@
 #encoding: utf-8
 import numpy as np
 from params import *
-from env import *
+
 # schedule policy 在edge server上, 队列的调度算法
 
-def FIFOPolicy(servers:Servers, cost, cost1, history):
+def FIFOPolicy(servers, cost, cost1, history):
     for i in range(len(servers.servers)):
         servers.servers[i].server = sorted(servers.servers[i].server ,key=lambda y:y.arrive_time)
         queue_time = 0

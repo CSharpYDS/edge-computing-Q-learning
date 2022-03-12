@@ -6,12 +6,12 @@ from env import *
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 import time
-from deep_q_learning import *
-from q_learning import QLearningPolicy
+from deep_q_learning_v3 import *
+from q_learning_v2 import QLearningPolicy1
 
 def main_without_config():
     time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
-    for episode in range(1):
+    for episode in range(3):
         x,xx,x1 = [],[],[]
         y,yy,y1 = [],[],[] 
         z,zz,z1 = [],[],[] 
@@ -28,22 +28,22 @@ def main_without_config():
             
             print("random+SJFPolicy",cost_random_sjf, cost1)
             # print("nearest+SJFPolicy",cost_near_sjf, cost2, history_near_sjf)
-            cost_Q_sjf, cost3,  history_Q_sjf = QLearningPolicy(job_sequence)
-            print("QLearning", cost_Q_sjf, cost3)
-            cost_DQN_sjf, cost4, history_DQN_sjf = deepQLearning(job_sequence)
+            # cost_Q_sjf, cost3,  history_Q_sjf = QLearningPolicy1(job_sequence)
+            # print("QLearning1", cost_Q_sjf, cost3)
+            cost_DQN_sjf, cost4, history_DQN_sjf = deepQLearning_v3(job_sequence)
             print("DQN", cost_DQN_sjf, cost4)
             
             x.append(cost_random_sjf)
             y.append(cost_near_sjf)
-            z.append(cost_Q_sjf)
+            # z.append(cost_Q_sjf)
             k.append(cost_DQN_sjf)
             xx.append(cost1)
             yy.append(cost2)
-            zz.append(cost3)
+            # zz.append(cost3)
             kk.append(cost4)
             x1.append(my_length)
             y1.append(my_length)
-            z1.append(my_length)
+            # z1.append(my_length)
             k1.append(my_length)
 
             i += 1
@@ -54,7 +54,7 @@ def main_without_config():
         plt.subplot(221)  
         plt.plot(x1,x,'r', label='random')
         plt.plot(y1,y,'g', label='nearest')
-        plt.plot(z1,z,'b', label='Q Learning')
+        # plt.plot(z1,z,'b', label='Q Learning')
         plt.plot(k1,k,'y', label='DQN')
         plt.grid(axis='x')
         plt.ylabel('sum of turn-around time')
@@ -71,7 +71,7 @@ def main_without_config():
         plt.subplot(222)
         plt.plot(x1,xx,'r', label='random')
         plt.plot(y1,yy,'g', label='nearest')
-        plt.plot(z1,zz,'b', label='Q Learning')
+        # plt.plot(z1,zz,'b', label='Q Learning')
         plt.plot(k1,kk,'y', label='DQN')
         plt.savefig('result/' + time1+"--"+str(episode)+ str(".png"))
         plt.grid(axis='x')

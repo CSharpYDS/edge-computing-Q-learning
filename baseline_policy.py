@@ -25,7 +25,7 @@ def nearestPolicy(job_sequence):
 
 def randomPolicy(job_sequence):
     cost_min, cost_min1 = 10000,10000
-    for episode in range(500):
+    for episode in range(1):
         history = []
         cost, cost1 = 0, 0
         servers = Servers()

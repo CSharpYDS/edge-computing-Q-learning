@@ -12,7 +12,7 @@ from deep_q_learning_v3 import *
 def main_without_config():
     for episode in range(4):
         i = MIN_JOB_SEQUENCE
-        while True:
+        for i in range(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE):
             # job sequence 
             my_length = i
             job_sequence = generate_job_sequence(my_length)
@@ -23,8 +23,6 @@ def main_without_config():
             cost_DQN_sjf, cost4, history_DQN_sjf = deepQLearning_v3(job_sequence)
             print("q ", cost_DQN_sjf, cost4)
             
-            i += 1
-            if i >= MAX_JOB_SEQUENCE: break
 
 if __name__ == "__main__":
     main_without_config()

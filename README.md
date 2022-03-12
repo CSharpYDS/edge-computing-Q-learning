@@ -34,12 +34,18 @@ job分配后, 下一时刻系统内的job总数
 `state.queue.shape = N_SERVER * N_JOB`
 `job_id.shape = 1 * N_JOB (one-hot)`
 三个信息拼接成形状为 `(1 , (2 * N_SERVER + 1) * N_JOB)` 的向量, 输入线性层
+
 ### reward
 首先优化目标设为 : 总周转时间
+
 周转时间 = (任务完成计算时间 - 任务开始分配时间) / 任务计算时间
+
 由于采用shortest - job -first 的调度策略, 每当分配一个新的job到服务器上时, 队列中比这个job计算时间更长的job等待时间将会变长
+
 增加的时间为 sum((new_job_compute_time)/(long_job_compute_time)
+
 所以每分配一个job, 都可以算出它对总周转时间的贡献, 把这个贡献设置为当前action的reward
+
 ---
 ## version 3
 ### state
@@ -54,12 +60,15 @@ job分配后, 下一时刻系统内的job总数
 ### state
 `state: [state.count()]`
 当前系统job的总数
+
 ### reward
 job分配后, 下一时刻系统内的job总数
+
 ---
 ## version 2
 ### state
 `state : [state_next.count() * (job.job_id)]`
-设置为当前系统的job总数 * job_id
+设置为当前系统的job总数 * job_id 
+
 ### reward
 设置为action对总周转时间的贡献, 同DQN version 2

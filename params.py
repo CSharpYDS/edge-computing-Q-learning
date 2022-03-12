@@ -8,7 +8,7 @@ PATH ='model/model.pt'
 PATH1 ='model/model2.pt'
 
 LOAD_OK = True
-LOAD_OK1 = False
+LOAD_OK1 = True
 V_OK = True
 Q_OK = True
 

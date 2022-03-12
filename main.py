@@ -50,7 +50,7 @@ def main_without_config():
             k1.append(my_length)
 
             i += 1
-            if i >= 10: break
+            if i >= 15: break
 
         # f, ax = plt.subplots(1,2)
         plt.figure()

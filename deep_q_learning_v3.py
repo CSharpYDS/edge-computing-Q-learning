@@ -15,7 +15,7 @@ def deepQLearning_v3(job_sequence):
     wrong = 0
     ret_history = []
 
-    for episode in range(500):
+    for episode in range(1):
         S = Servers()
         cost ,cost1 = 0, 0
         history = []

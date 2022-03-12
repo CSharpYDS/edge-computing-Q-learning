@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 import time
 from deep_q_learning_v3 import *
-from q_learning import QLearningPolicy
+
 
 def main_without_config():
-    for episode in range(1):
+    for episode in range(4):
         i = MIN_JOB_SEQUENCE
         while True:
             # job sequence 

@@ -5,8 +5,10 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
 PATH ='model/model.pt'
+PATH1 ='model/model2.pt'
 
 LOAD_OK = True
+LOAD_OK1 = False
 V_OK = True
 Q_OK = True
 
@@ -87,7 +89,7 @@ def randomTimes():
     # t_transmission = np.random.randint(MIN_TRANS_TIME,MAX_TRANS_TIME,(N_JOB,N_SERVER)) #TODO：设置范围 
     t_transmission = genProcessingParameter()
     # job计算的时间
-    t_compute = np.random.poisson(5,N_JOB) #计算时间符合质数分布
+    t_compute = np.random.poisson(5,N_JOB) #计算时间符合泊松分布
     # print(t_compute)
     # print(t_transmission)
     return t_transmission,t_compute

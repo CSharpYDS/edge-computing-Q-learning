@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 import time
 from deep_q_learning_v3 import *
-from q_learning_v2 import QLearningPolicy1
+from deep_q_learning_v2 import *
+from deep_q_learning_v1 import *
+from q_learning_v1 import *
+from q_learning_v2 import *
 
 def main_without_config():
     time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
@@ -19,10 +22,10 @@ def main_without_config():
         i = MIN_JOB_SEQUENCE
         while True:
             # job sequence 
-            my_length = i
-            job_sequence = generate_job_sequence(my_length)
+            job_sequence = generate_job_sequence()
             print("")
             print("length", len(job_sequence))
+            my_length = len(job_sequence)
             cost_random_sjf,cost1, history_random_sjf = randomPolicy(job_sequence)
             cost_near_sjf,cost2, history_near_sjf = nearestPolicy(job_sequence)
             
@@ -47,7 +50,7 @@ def main_without_config():
             k1.append(my_length)
 
             i += 1
-            if i >= MAX_JOB_SEQUENCE: break
+            if i >= 10: break
 
         # f, ax = plt.subplots(1,2)
         plt.figure()

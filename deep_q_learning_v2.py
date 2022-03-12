@@ -2,7 +2,7 @@ from torch import FloatTensor
 from brain import *
 from env import *
 from schedule_policy import *
-# from brain_v2 import
+from brain_v2 import *
 def parseState(x,y,z):
     x = np.concatenate([x,y,z])
     x = x.reshape((1, (2*N_SERVER+1)*N_JOB))
@@ -10,7 +10,7 @@ def parseState(x,y,z):
     return x
 
 def deepQLearning_v2(job_sequence):
-    agent = Agent1()
+    agent = Agent_v2()
     cost_min, cost_min1 = 1000000, 1000000
     wrong = 0
     ret_history = []
@@ -39,18 +39,12 @@ def deepQLearning_v2(job_sequence):
                     one_hot[0][job.job_id] += 1
                     if server_id!=-1:
                         state_next_trans, state_next_queue, _ = state_next.updateState(S, time)
-                        # tensor_state_next = torch.cat(torch.from_numpy(np.array([state_next_trans])).type(FloatTensor).to(device),
-                        #                     torch.from_numpy(np.array([state_next_queue])).type(FloatTensor).to(device),
-                        #                     torch.from_numpy(np.array([one_hot])).type(FloatTensor).to(device))
                         tensor_state_next = parseState(state_next_trans, state_next_queue, one_hot)
                         agent.memorize(tensor_state, action.to(device), tensor_state_next, reward)
                         agent.update_q_function()
 
                     # new round state
                     state_trans, state_queue, _ = state.updateState(S, time)
-                    # tensor_state = [torch.from_numpy(np.array([state_trans])).type(FloatTensor).to(device),
-                    #                 torch.from_numpy(np.array([state_queue])).type(FloatTensor).to(device),
-                    #                 torch.from_numpy(np.array([one_hot])).type(FloatTensor).to(device)]
                     tensor_state = parseState(state_trans, state_queue, one_hot)
                     # 2.1 获取action
                     action = agent.get_action(tensor_state, episode)

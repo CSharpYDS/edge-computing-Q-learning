@@ -17,7 +17,7 @@ CAPACITY = 5000
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
 
-class Agent1:
+class Agent_v2:
     def __init__(self):
         self.brain = Brain1() 
 

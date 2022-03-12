@@ -25,14 +25,13 @@ def nearestPolicy(job_sequence):
 
 def randomPolicy(job_sequence):
     cost_min, cost_min1 = 10000,10000
-    for episode in range(1):
+    for episode in range(100):
         history = []
         cost, cost1 = 0, 0
         servers = Servers()
         i = 0
         for time in range(100000):
             if i >= len(job_sequence) and servers.done() : break
-
             for job in job_sequence:
                 if job.depart_time == time:
                     server_id = np.random.randint(N_SERVER)

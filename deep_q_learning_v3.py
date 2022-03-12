@@ -3,6 +3,11 @@ from brain import *
 from env import *
 from schedule_policy import *
 from brain_v3 import *
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
+from tqdm import tqdm
+import time 
+
 def parseState(x,y,z):
     ret = [torch.from_numpy(np.array([[x]])).type(FloatTensor).to(device),
             torch.from_numpy(np.array([[y]])).type(FloatTensor).to(device),
@@ -14,8 +19,10 @@ def deepQLearning_v3(job_sequence):
     cost_min, cost_min1 = 1000000, 1000000
     wrong = 0
     ret_history = []
-
-    for episode in range(1):
+    loss_arr = []
+    loss_idx = []
+    time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
+    for episode in tqdm(range(1200)):
         S = Servers()
         cost ,cost1 = 0, 0
         history = []
@@ -24,27 +31,31 @@ def deepQLearning_v3(job_sequence):
         tensor_state, tensor_state_next = None, None
         server_id = -1
         reward = 0
+        loss = 0
 
-        for time in range(0, 100000):
+        for t in range(0, 100000):
+
             if idx >= len(job_sequence) and S.done(): 
-                state_next.updateState(S, time)
+                state_next.updateState(S, t)
                 agent.memorize(tensor_state, action.to(device), tensor_state_next, reward)
-                agent.update_q_function()
+                x = agent.update_q_function()
+                loss = loss + x
                 break
             while True:
-                if idx < len(job_sequence) and job_sequence[idx].depart_time == time:
+                if idx < len(job_sequence) and job_sequence[idx].depart_time == t:
                     job = job_sequence[idx]
                     idx+=1
                     one_hot = np.zeros((1, N_JOB))
                     one_hot[0][job.job_id] += 1
                     if server_id!=-1:
-                        state_next_trans, state_next_queue, _ = state_next.updateState(S, time)
+                        state_next_trans, state_next_queue, _ = state_next.updateState(S, t)
                         tensor_state_next = parseState(state_next_trans, state_next_queue, one_hot)
                         agent.memorize(tensor_state, action.to(device), tensor_state_next, reward)
-                        agent.update_q_function()
+                        x = agent.update_q_function()
+                        loss = loss + x
 
                     # new round state
-                    state_trans, state_queue, _ = state.updateState(S, time)
+                    state_trans, state_queue, _ = state.updateState(S, t)
                     tensor_state = parseState(state_trans, state_queue, one_hot)
                     # 2.1 获取action
                     action = agent.get_action(tensor_state, episode)
@@ -59,18 +70,26 @@ def deepQLearning_v3(job_sequence):
                     reward = torch.from_numpy(np.array([-reward])).type(torch.FloatTensor).to(device)
                 else:
                     break
-            S, cost,cost1, history = SJFPolicy(S, time, cost, cost1,history) # 直接更新cost
+            S, cost,cost1, history = SJFPolicy(S, t, cost, cost1,history) # 直接更新cost
         if(episode % 2 == 0):
             agent.update_target_q_function()
 
+        
         cost_min = min(cost_min, cost)
         cost_min1 = min(cost_min1, cost1) 
 
+        loss_arr.append(loss.cpu().item())
+        loss_idx.append(episode)
         if judge(history) == False or len(history) != len(job_sequence):
             wrong += 1
             print(history)
-
+    plt.figure()
+    # print(loss_idx, loss_arr)
+    plt.plot(loss_idx, loss_arr,'r', label='loss')
+    plt.savefig('loss_result/temp/' + time1 + str(".png"))
+    plt.close()
+    # plt.show()
     torch.save(agent.brain.main_q_network, PATH1)
     print("wrong DQN", wrong)
-    return cost_min, cost_min1, ret_history
+    return cost_min, cost_min1, ret_history, loss_arr
 

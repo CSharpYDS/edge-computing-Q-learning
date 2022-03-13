@@ -11,15 +11,13 @@ from tqdm import tqdm
 
 def main_without_config():
     time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
-    for epoch in range(1200): # 绘制训练的收敛图
+    for epoch in range(200): # 绘制训练的收敛图
         loss_arr = []
         loss_arr_temp = []
         loss_idx = []
         for episode in range(32): # 每次32个job sequence
             for i in (range(1,2)):
                 job_sequence = generate_job_sequence()
-                if len(job_sequence) > 10:
-                    job_sequence = job_sequence[int(len(job_sequence)/2):]
                 print("")
                 print("length", len(job_sequence))
                 cost_random_sjf,cost1, history_random_sjf = randomPolicy(job_sequence)

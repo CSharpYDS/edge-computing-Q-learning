@@ -185,19 +185,20 @@ def judge(history):
 # 随机生成工作序列
 def generate_job_sequence(my_length = 0):
     values = []
-    job_num = np.random.poisson(2, N_JOB) # job 个数符合泊松分布
-    job_gap = {}
-    for i in range(N_JOB):
-        job_gap[i] = np.random.poisson(3, job_num[i]) # job 间隔符合符合泊松分布/指数分布
-        ptr = 0
-        for j in range(len(job_gap[i])):
-            values.append(Job(i, ptr + job_gap[i][j]))
-            ptr += job_gap[i][j]
-    # length = np.random.randint(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE) # 随机生成队列长度
-    # for i in range(my_length):
-    #     job_id = np.random.randint(N_JOB)
-    #     time = np.random.randint(MIN_TIMELINE,MAX_TIMELINE)
-    #     values.append(Job(job_id, time))
+    ptr = 0
+    for i in range(4):
+        job_num = np.random.poisson(1, N_JOB) # job 个数符合泊松分布
+        job_gap = {}
+        length = 0
+        for i in job_num:
+            length += i
+
+        time_gap = np.random.poisson(6, length)
+        per = np.random.permutation(10)
+        for i in per:
+            values.append(Job(i, ptr + time_gap[i]))
+            ptr += job_gap[i]
+
     job_sequence = sorted(values,key=lambda x:x.depart_time) # 按照到达时间排序
     # for x in job_sequence:
     #     print(x.job_id, x.depart_time)

@@ -62,5 +62,14 @@ plt.plot(x, y,'r', label='loss')
 plt.subplot(224)
 plt.plot(x, y,'r', label='loss')
 
-plt.show()
+# plt.show()
 plt.close()
+
+print(np.random.poisson(1, (N_JOB,N_SERVER)))
+x = np.random.poisson(1, 10)
+sum = 0
+for i in x:
+    sum += i
+print(1.0*sum/len(x))
+print(np.random.exponential(6, (N_JOB,N_SERVER)))
+print(np.random.permutation(10))

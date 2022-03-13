@@ -6,12 +6,12 @@ from torch import nn
 from torch import optim
 import torch.nn.functional as F
 from params import *
-
+from copy import copy 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
-BATCH_SIZE = 16
-CAPACITY = 5000
+BATCH_SIZE = 8
+CAPACITY = 10000
 
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
@@ -22,7 +22,7 @@ class Agent_v2:
         self.brain = Brain1() 
 
     def update_q_function(self):
-        self.brain.replay()
+        return self.brain.replay()
 
     def get_action(self, state, episode):
         action = self.brain.decide_action(state, episode)
@@ -81,14 +81,14 @@ class Brain1:
 
     def replay(self):
         if len(self.memory) < BATCH_SIZE:
-            return
+            return torch.tensor([0.0]).to(device)
         self.batch, self.state_batch, self.action_batch, self.reward_batch, self.non_final_next_states = self.make_minibatch()
         self.expected_state_action_values = self.get_expected_state_action_values()
-        self.update_main_q_network()
+        return self.update_main_q_network()
 
     def decide_action(self, state, episode):
         epsilon = 0.5 * (1 / (episode + 1))
-        if epsilon <= np.random.uniform(0, 1):
+        if epsilon <= np.random.uniform(0, 1) or episode == 0:
         # if np.random.randint(1,10) >=2:
             self.main_q_network.eval() 
             with torch.no_grad():
@@ -121,7 +121,7 @@ class Brain1:
         self.state_action_values = self.main_q_network(self.state_batch).gather(1, self.action_batch.to(device)).to(device)
 
         non_final_mask = torch.ByteTensor(tuple(map(lambda s: s is not None, self.batch.next_state)))
-        next_state_values = torch.zeros(BATCH_SIZE)
+        next_state_values = torch.zeros(BATCH_SIZE).to(device)
 
         a_m = torch.zeros(BATCH_SIZE).type(torch.LongTensor).to(device)
 
@@ -138,10 +138,12 @@ class Brain1:
         self.main_q_network.train()
         loss = F.smooth_l1_loss(self.state_action_values,
                                 self.expected_state_action_values.unsqueeze(1))
-
+        # print("loss, ", loss)
+        ret = copy(loss)
         self.optimizer.zero_grad()  
         loss.backward()  
         self.optimizer.step() 
+        return ret
 
     def update_target_q_network(self): 
         self.target_q_network.load_state_dict(self.main_q_network.state_dict())

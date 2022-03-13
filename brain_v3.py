@@ -97,7 +97,7 @@ class Brain_v3:
 
     def replay(self):
         if len(self.memory) < BATCH_SIZE:
-            return 0
+            return torch.Tensor([0.0]).to(device)
         self.batch, self.state_batch, self.action_batch, self.reward_batch, self.non_final_next_states = self.make_minibatch()
         self.expected_state_action_values = self.get_expected_state_action_values()
         return self.update_main_q_network()

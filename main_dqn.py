@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 def main_without_config():
     time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
-    for epoch in range(10): # 绘制训练的收敛图
+    for epoch in range(20): # 绘制训练的收敛图
         loss_arr = []
         loss_arr_temp = []
         loss_idx = []
@@ -22,7 +22,7 @@ def main_without_config():
                 print("length", len(job_sequence))
                 cost_random_sjf,cost1, history_random_sjf = randomPolicy(job_sequence)
                 print("r ", cost_random_sjf, cost1)
-                cost_DQN_sjf, cost4, history_DQN_sjf, loss = deepQLearning_v3(job_sequence)
+                cost_DQN_sjf, cost4, history_DQN_sjf, loss = deepQLearning_v3(job_sequence, None)
                 print("q ", cost_DQN_sjf, cost4)
                 loss_arr_temp.append(loss)
         for i in range(1200):
@@ -35,7 +35,7 @@ def main_without_config():
                 loss_arr[j] = float(1.0*loss_arr[j]/32)
         plt.figure()
         plt.plot(loss_idx, loss_arr, 'r', label='loss')
-        plt.savefig('loss_result/' + time1+"--"+str(epoch)+ str(".png"))
+        plt.savefig('loss_result/loss1/' + time1+"--"+str(epoch)+ str(".png"))
         plt.close()
 if __name__ == "__main__":
     main_without_config()

@@ -43,3 +43,24 @@ print(y)
 print(z)
 k = np.concatenate([x,y,z])
 print(k.shape)
+
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
+
+x = [1,2,3]
+y = [1,2,3]
+plt.figure()
+plt.subplot(221)
+plt.plot(x, y,'r', label='loss')
+
+plt.subplot(222)
+plt.plot(x, y,'r', label='loss')
+
+plt.subplot(223)
+plt.plot(x, y,'r', label='loss')
+
+plt.subplot(224)
+plt.plot(x, y,'r', label='loss')
+
+plt.show()
+plt.close()

@@ -28,7 +28,7 @@ def FIFOPolicy(servers, cost, cost1, history):
     return cost, cost1, history
 
 
-def SJFPolicy(servers, time, cost, cost1, history): 
+def SJFPolicy(servers, time, cost, cost1, history, server_state): 
     for i in range(len(servers.servers)):
         x = servers.servers[i]
         if x.computing == None: # 没有正在计算的
@@ -47,4 +47,9 @@ def SJFPolicy(servers, time, cost, cost1, history):
                 x.computing = None
                 x.computing_time = 0
         servers.servers[i] = x
-    return servers, cost, cost1, history
+        if server_state != None:
+            # print(server_state)
+            # print(server_state[0])
+            server_state[i][0].append(len(x.waiting))
+            server_state[i][1].append(time)
+    return servers, cost, cost1, history, server_state

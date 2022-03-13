@@ -107,7 +107,7 @@ class Servers(object):
         return True    
     def getAddedCost(self, job, server_id, time):
         S1 = self
-        S1, _, _, _ = SJFPolicy(S1, job.arrive_time, 0, 0, [])
+        S1, _, _, _, _ = SJFPolicy(S1, job.arrive_time, 0, 0, [], None)
         cost = 0.0
         prefix = 0
         for x in S1.servers[server_id].waiting:
@@ -131,6 +131,7 @@ class Servers(object):
                 elif x.arrive_time < time + prefix + job.compute_time:
                     gap = time + prefix + job.compute_time - x.arrive_time
                     cost += float(1.0 * gap / x.compute_time)
+        cost += float(1.0*(job.arrive_time - job.depart_time)/job.compute_time)
         return cost
 
 

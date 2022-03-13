@@ -14,14 +14,16 @@ def parseState(x,y,z):
             torch.from_numpy(np.array([[z]])).type(FloatTensor).to(device)]
     return ret
 
-def deepQLearning_v3(job_sequence):
+def deepQLearning_v3(job_sequence, time1 = None):
     agent = Agent_v3()
     cost_min, cost_min1 = 1000000, 1000000
     wrong = 0
     ret_history = []
     loss_arr = []
     loss_idx = []
-    time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
+    if time1 == None:
+        time1 = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()) 
+    final_server_state = [[[],[]] for i in range(N_SERVER)]
     for episode in tqdm(range(1200)):
         S = Servers()
         cost ,cost1 = 0, 0
@@ -32,9 +34,9 @@ def deepQLearning_v3(job_sequence):
         server_id = -1
         reward = 0
         loss = 0
-
+        server_state = [[[],[]] for i in range(N_SERVER)]
+        
         for t in range(0, 100000):
-
             if idx >= len(job_sequence) and S.done(): 
                 state_next.updateState(S, t)
                 agent.memorize(tensor_state, action.to(device), tensor_state_next, reward)
@@ -70,25 +72,40 @@ def deepQLearning_v3(job_sequence):
                     reward = torch.from_numpy(np.array([-reward])).type(torch.FloatTensor).to(device)
                 else:
                     break
-            S, cost,cost1, history = SJFPolicy(S, t, cost, cost1,history) # 直接更新cost
+            S, cost,cost1, history, server_state = SJFPolicy(S, t, cost, cost1,history, server_state) # 直接更新cost
         if(episode % 2 == 0):
             agent.update_target_q_function()
 
-        
+        if cost_min > cost and cost_min1 > cost1:
+            ret_history = history
+            final_server_state = server_state
         cost_min = min(cost_min, cost)
         cost_min1 = min(cost_min1, cost1) 
-
+    
         loss_arr.append(loss.cpu().item())
         loss_idx.append(episode)
         if judge(history) == False or len(history) != len(job_sequence):
             wrong += 1
             print(history)
     plt.figure()
-    # print(loss_idx, loss_arr)
     plt.plot(loss_idx, loss_arr,'r', label='loss')
     plt.savefig('loss_result/temp/' + time1 + str(".png"))
     plt.close()
+
     # plt.show()
+    plt.figure()
+    plt.subplot(151)
+    plt.plot(final_server_state[0][1], final_server_state[0][0],'r', label='loss')
+    plt.subplot(152)
+    plt.plot(final_server_state[1][1], final_server_state[1][0],'r', label='loss')
+    plt.subplot(153)
+    plt.plot(final_server_state[2][1], final_server_state[2][0],'r', label='loss')
+    plt.subplot(154)
+    plt.plot(final_server_state[3][1], final_server_state[3][0],'r', label='loss')
+    plt.subplot(155)
+    plt.plot(final_server_state[4][1], final_server_state[4][0],'r', label='loss')
+    plt.savefig('loss_result/temp_server/' + time1 + str(".png"))
+    plt.close()
     torch.save(agent.brain.main_q_network, PATH1)
     print("wrong DQN", wrong)
     return cost_min, cost_min1, ret_history, loss_arr

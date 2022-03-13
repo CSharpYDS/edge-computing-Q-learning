@@ -186,18 +186,16 @@ def judge(history):
 def generate_job_sequence(my_length = 0):
     values = []
     ptr = 0
-    for i in range(4):
-        job_num = np.random.poisson(1, N_JOB) # job 个数符合泊松分布
-        job_gap = {}
-        length = 0
-        for i in job_num:
-            length += i
-
-        time_gap = np.random.poisson(6, length)
+    # print("a")
+    for j in range(4):
+        job_num = np.random.poisson(10, N_JOB) # job 个数符合泊松分布
+        time_gap = np.random.poisson(6, job_num)
         per = np.random.permutation(10)
-        for i in per:
-            values.append(Job(i, ptr + time_gap[i]))
-            ptr += job_gap[i]
+        print(per, time_gap)
+        for i in range(job_num):
+            values.append(Job(per[i], ptr + time_gap[i%10]))
+            ptr += time_gap[i%10]
+    # print("xx")
 
     job_sequence = sorted(values,key=lambda x:x.depart_time) # 按照到达时间排序
     # for x in job_sequence:

@@ -41,7 +41,8 @@ def SJFPolicy(servers, time, cost, cost1, history, server_state):
         if x.computing != None:
             if x.computing_time <= time: # 已经计算完毕
                 # server id, job id, finish_time) 
-                history.append((i, x.computing.job_id, x.computing_time))
+                pre = x.computing_time - x.computing.compute_time + 1
+                history.append((i, x.computing.job_id, pre, x.computing.compute_time, x.computing_time))
                 cost += float(x.computing_time - x.computing.depart_time)/float(x.computing.compute_time)
                 cost1 += x.computing_time
                 x.computing = None

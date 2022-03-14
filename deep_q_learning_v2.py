@@ -66,6 +66,7 @@ def deepQLearning_v2(job_sequence, time1 = None):
                     job.arrive_time = job.arriveTime(server_id)
                     S1 = Servers()
                     S1.clone(S)
+                    # reward = 1
                     reward = S1.getAddedCost(job, server_id, job.arrive_time)
                     S.servers[server_id].server.append(job)
                     reward = torch.from_numpy(np.array([-reward])).type(torch.FloatTensor).to(device)

@@ -62,5 +62,31 @@ plt.plot(x, y,'r', label='loss')
 plt.subplot(224)
 plt.plot(x, y,'r', label='loss')
 
-plt.show()
+# plt.show()
 plt.close()
+
+
+class BinaryIndexTree:
+    def __init__(self, array):
+        self.array = array
+        self.n = len(array)
+    def lowbit(self, x):
+        return x & (-x)
+    def update(self, i, k):
+        while i<= self.n:
+            self.array[i] += k
+            i += self.lowbit(i)
+    def query(self, x):
+        ret = 0
+        while x>0:
+            ret += self.array[x]
+            x -= self.lowbit(x)
+        return ret
+
+
+array = [0 for i in range(1000000)]
+x = [BinaryIndexTree(array) for i in range(N_SERVER)]
+
+x[0].update(59,1)
+x[0].update(61,-1)
+print(x[0].query(90))

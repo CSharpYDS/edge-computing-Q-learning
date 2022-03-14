@@ -9,7 +9,7 @@ PATH1 ='model/model2.pt'
 
 LOAD_OK = True
 LOAD_OK1 = True
-V_OK = True
+V_OK = False
 Q_OK = True
 
 BETA = 100
@@ -87,9 +87,18 @@ def genProcessingParameter(redo = False):
 def randomTimes():
     # job传输到server上的时间 
     # t_transmission = np.random.randint(MIN_TRANS_TIME,MAX_TRANS_TIME,(N_JOB,N_SERVER)) #TODO：设置范围 
-    t_transmission = genProcessingParameter()
+    # t_transmission = genProcessingParameter()
+    t_transmission = np.random.poisson(1, (N_JOB,N_SERVER))
+    for i in range(N_JOB):
+        for j in range(N_SERVER):
+            if t_transmission[i][j] <=0:
+                t_transmission[i][j] = 1
     # job计算的时间
-    t_compute = np.random.poisson(5,N_JOB) #计算时间符合泊松分布
+    t_compute = np.random.poisson(2,N_JOB) #计算时间符合泊松分布
+    # print(t_compute)
+    for i in range(N_JOB):
+        if t_compute[i] <= 0:
+            t_compute[i] = 1
     # print(t_compute)
     # print(t_transmission)
     return t_transmission,t_compute

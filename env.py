@@ -136,68 +136,78 @@ class Servers(object):
 
 
 class BinaryIndexTree:
-    def __init__(self, array: list):
-        self._array = [0] + array
-        n = len(array)
-        for i in range(1, n + 1):
-            j = i + (i & -i)
-            if j < n + 1:
-                self._array[j] += self._array[i]
-    def lowbit(self, x: int) -> int:
+    def __init__(self, array):
+        self.array = array
+        self.n = len(array)
+    def lowbit(self, x):
         return x & (-x)
-    def update(self, idx: int, val: int):
-        prev = self.query(idx, idx + 1)
-        idx += 1
-        val -= prev    # val 是要增加的值
-        while idx < len(self._array):
-            self._array[idx] += val
-            idx += self.lowbit(idx)
-
-    def query(self, begin: int, end: int) -> int:
-        return self._query(end) - self._query(begin)
-    def _query(self, idx: int) -> int:
-        res = 0
-        while idx > 0:
-            res += self._array[idx]
-            idx -= self.lowbit(idx)
-        return res
+    def update(self, i, k):
+        while i<= self.n:
+            self.array[i] += k
+            i += self.lowbit(i)
+    def query(self, x:int):
+        ret = 0
+        while x>0:
+            ret += self.array[x]
+            x -= self.lowbit(x)
+        return ret
 
 def judge(history):
-    array = [0 for i in range(300)]
-    servers = [BinaryIndexTree(array) for i in range(N_SERVER)]
+    array = [0 for i in range(1000000)]
+    servers = [[0 for j in range(1000000)] for i in range(N_SERVER)]
 
     for x in history:
         server_id = x[0]
         job_id = x[1]
-        finish_time = x[2] # 22
-        compute_time = t_compute[job_id] # 8
-        arrive_time = finish_time - compute_time + 1 # 15
-        if servers[server_id].query(0,finish_time) != 0:
-            print(x[0], x[1], x[2], compute_time, arrive_time)
-            return False
-        servers[server_id].update(arrive_time, -1)
-        servers[server_id].update(finish_time, 1)
+        # compute_time = t_compute[job_id] # 8
+        # arrive_time = finish_time - compute_time + 1 # 15
+        arrive_time = x[2]
+        compute_time = x[3]
+        finish_time = x[4]
 
+        for i in range(arrive_time, finish_time+1):
+            if servers[server_id][i] !=0:
+                # print(servers[server_id][i], i)
+                # print(x[0], x[1], x[2], x[3], x[4])
+                return False
+            servers[server_id][i] += 1
     return True
 
 
 
-# 随机生成工作序列
+# # 随机生成工作序列
+# def generate_job_sequence(my_length = 0):
+#     values = []
+#     job_num = np.random.poisson(2, N_JOB) # job 个数符合泊松分布
+#     job_gap = {}
+#     for i in range(N_JOB):
+#         job_gap[i] = np.random.poisson(3, job_num[i]) # job 间隔符合符合泊松分布/指数分布
+#         ptr = 0
+#         for j in range(len(job_gap[i])):
+#             values.append(Job(i, ptr + job_gap[i][j]))
+#             ptr += job_gap[i][j]
+#     # length = np.random.randint(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE) # 随机生成队列长度
+#     # for i in range(my_length):
+#     #     job_id = np.random.randint(N_JOB)
+#     #     time = np.random.randint(MIN_TIMELINE,MAX_TIMELINE)
+#     #     values.append(Job(job_id, time))
+#     job_sequence = sorted(values,key=lambda x:x.depart_time) # 按照到达时间排序
+#     # for x in job_sequence:
+#     #     print(x.job_id, x.depart_time)
+#     return job_sequence
+
 def generate_job_sequence(my_length = 0):
     values = []
-    job_num = np.random.poisson(2, N_JOB) # job 个数符合泊松分布
-    job_gap = {}
-    for i in range(N_JOB):
-        job_gap[i] = np.random.poisson(3, job_num[i]) # job 间隔符合符合泊松分布/指数分布
-        ptr = 0
-        for j in range(len(job_gap[i])):
-            values.append(Job(i, ptr + job_gap[i][j]))
-            ptr += job_gap[i][j]
-    # length = np.random.randint(MIN_JOB_SEQUENCE, MAX_JOB_SEQUENCE) # 随机生成队列长度
-    # for i in range(my_length):
-    #     job_id = np.random.randint(N_JOB)
-    #     time = np.random.randint(MIN_TIMELINE,MAX_TIMELINE)
-    #     values.append(Job(job_id, time))
+    job_num = np.random.poisson(10, 3)
+    ptr = 1
+    for j in range(3):
+        length = job_num[j]
+        job_gap = np.random.poisson(3, length)
+        per = np.random.permutation(N_JOB)
+        for i in range(length):
+            ptr = ptr + job_gap[i%10]
+            values.append(Job(per[i%10], ptr))
+    
     job_sequence = sorted(values,key=lambda x:x.depart_time) # 按照到达时间排序
     # for x in job_sequence:
     #     print(x.job_id, x.depart_time)

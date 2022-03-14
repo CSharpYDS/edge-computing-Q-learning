@@ -163,7 +163,7 @@ class BinaryIndexTree:
         return res
 
 def judge(history):
-    array = [0 for i in range(300)]
+    array = [0 for i in range(10000000)]
     servers = [BinaryIndexTree(array) for i in range(N_SERVER)]
 
     for x in history:
@@ -187,13 +187,12 @@ def generate_job_sequence(my_length = 0):
     values = []
     ptr = 0
     # print("a")
-    for j in range(4):
-        job_num = np.random.poisson(10, N_JOB) # job 个数符合泊松分布
-        time_gap = np.random.poisson(6, job_num)
+    for j in range(3):
+        job_num = np.random.poisson(10, 1) # job 个数符合泊松分布
+        time_gap = np.random.poisson(5, job_num[0])
         per = np.random.permutation(10)
-        print(per, time_gap)
-        for i in range(job_num):
-            values.append(Job(per[i], ptr + time_gap[i%10]))
+        for i in range(job_num[0]):
+            values.append(Job(per[i%10], ptr + time_gap[i%10]))
             ptr += time_gap[i%10]
     # print("xx")
 

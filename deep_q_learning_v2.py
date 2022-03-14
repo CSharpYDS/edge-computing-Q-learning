@@ -89,12 +89,12 @@ def deepQLearning_v2(job_sequence, time1 = None):
         if judge(history) == False or len(history) != len(job_sequence):
             wrong += 1
             print(history)
-    # plt.figure()
-    # plt.plot(loss_idx, loss_arr,'r', label='loss')
-    # plt.savefig('loss_result/temp1/' + time1 + str(".png"))
-    # plt.close()
+    plt.figure()
+    plt.plot(loss_idx, loss_arr,'r', label='loss')
+    plt.savefig('loss_result/temp1/' + time1 + str(".png"))
+    plt.close()
 
-    # plt.show()
+#  plt.show()
     plt.figure()
     plt.subplot(151)
     plt.plot(final_server_state[0][1], final_server_state[0][0],'r', label='loss')
